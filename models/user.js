@@ -7,11 +7,12 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ Wishlist, Cart, Orders, Products }) {
+    static associate({ Wishlist, Cart, Orders, Products, Notification }) {
       this.hasMany(Wishlist, { foreignKey: 'userId', as: 'wishlists' })
       this.hasMany(Cart, { foreignKey: 'userId', as: 'carts' })
       this.hasMany(Orders, { foreignKey: 'userId' })
       this.belongsToMany(Products, { through: 'Reviews', foreignKey: 'userId', otherKey: 'productId' })
+      this.hasMany(Notification, { foreignKey: 'userId' })
     }
   };
   User.init({
@@ -59,11 +60,7 @@ module.exports = (sequelize, DataTypes) => {
     OTP: {
       type: DataTypes.STRING
     },
-<<<<<<< HEAD
-    role:{
-=======
     role: {
->>>>>>> main
       type: DataTypes.STRING,
       defaultValue: 'User'
     }

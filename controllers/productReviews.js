@@ -1,4 +1,4 @@
-const { User, Products } = require('../models')
+const { User, Products, Orders } = require('../models')
 
 exports.addReview = async (req, res) => {
     const {
@@ -9,30 +9,42 @@ exports.addReview = async (req, res) => {
     } = req.body
     try {
         const user = await User.findOne({ where: { uuid } })
-        //try from orders table because no one purchased before can't write review
         if (user) {
-            const product = await Products.findOne({ where: { id } })
-            if (product) {
-                await user.addProduct(product, {
-                    through: {
-                        rating, reviewMessage
-                    }
-                }).then(data => {
-                    res.json({
-                        status: 'SUCCESS',
-                        data
+            const orderDetails = await Orders.findOne({
+                where: {
+                    userId: user.id,
+                    productId: id
+                }
+            })
+            if (orderDetails) {
+                const product = await Products.findOne({ where: { id } })
+                if (product) {
+                    await user.addProduct(product, {
+                        through: {
+                            rating, reviewMessage
+                        }
+                    }).then(data => {
+                        res.json({
+                            status: 'SUCCESS',
+                            data
+                        })
+                    }).catch(err => {
+                        console.log("Error occured in await", err)
+                        res.json({
+                            status: 'Failed',
+                            message: 'Internal server error'
+                        })
                     })
-                }).catch(err => {
-                    console.log("Error occured in await", err)
+                } else {
                     res.json({
-                        status: 'Failed',
-                        message: 'Internal server error'
+                        status: 'FAILED',
+                        message: 'Product not available'
                     })
-                })
-            } else {
+                }
+            }else{
                 res.json({
                     status: 'FAILED',
-                    message: 'Product not available'
+                    message: 'till you didnt purchase this product so you cant add review'
                 })
             }
         } else {

@@ -3,23 +3,24 @@ const { DeviceDetails } = require('../models');
 exports.registerDevice = async (req, res) => {
     const {
         deviceName,
-        deviceId,
-        login
+        deviceId
     } = req.body
     try {
         const findDevice = await DeviceDetails.findOne({
-            where:{deviceId},
+            where: {
+                deviceId
+            }
         })
-        if(findDevice){
+        if (findDevice) {
             res.json({
-                status:'SUCCESS',
+                status: 'FAILED',
+                message: 'You are belongs to us.Signin please!!!',
                 findDevice
             })
-        }else{
+        } else {
             await DeviceDetails.create({
                 deviceId,
-                deviceName,
-                login
+                deviceName
             }).then(response => {
                 if (response) {
                     res.json({

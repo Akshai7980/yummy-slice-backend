@@ -1,18 +1,22 @@
 const nodemailer = require('nodemailer');
-let forOTP = 65;
-const sentMail = async (email, User) => {
+const bcrypt = require('bcrypt')
 
-    const randomCodeGenerate = () => {
-        let random1 = Math.floor((Math.random() * 100) + 10)
-        let random2 = Math.floor((Math.random() * 50) + 10)
-        let random3 = Math.floor((Math.random() * 20) + 10)
-        let randomNumber
-        return (
-            randomNumber = `${random1} ${random3} ${random2}`)
+const sentMail = async (email, User) => {
+    function makeid(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() *
+                charactersLength));
+        }
+        return result;
     }
-    const OTP = randomCodeGenerate()
-    console.log(OTP)
-    const OTPsave = await User.update({ OTP }, {
+    const randomPassword = makeid(10)
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hashedPassword = bcrypt.hashSync(randomPassword, salt);
+    const OTPsave = await User.update({ password: hashedPassword }, {
         where: { email }
     })
     return new Promise((resolve) => {
@@ -21,17 +25,15 @@ const sentMail = async (email, User) => {
                 host: "smtp.office365.com",
                 port: 587,
                 auth: {
-                    user: 'abhikrish1984@outlook.com',
-                    pass: '1984krishabhi'
+                    user: 'krishnaabhi1231@outlook.com',
+                    pass: 'jZgKVTrR7PGc92H'
                 }
             })
             const mailOptions = {
-                from: 'abhikrish1984@outlook.com',
-                to: 'abhikrishabhi461998@gmail.com',
+                from: 'krishnaabhi1231@outlook.com',
+                to: email,
                 subject: "Yummy Slice slice send you verification code.",
-                text: "Highly Confidential.Don't Share With Anyone",
-                html: "<b>Your One Time Password Y-" + OTP + "</b>",
-
+                text: "Highly Confidential.Don't Share With Anyone.Your Password is-" + randomPassword,
             }
             transaport.sendMail(mailOptions, (error, info) => {
                 if (error) {

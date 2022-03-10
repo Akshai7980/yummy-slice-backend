@@ -1,7 +1,11 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Notification extends Model { }
+    class Notification extends Model { 
+         static associate({ User }) {
+            this.belongsTo(User, { foreignKey: 'userId' })
+             }
+    }
     Notification.init({
         title: {
             type: DataTypes.STRING,

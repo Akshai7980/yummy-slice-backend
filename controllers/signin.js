@@ -1,33 +1,33 @@
 const { User } = require("../models")
 const jwt = require('jsonwebtoken');
-
+const bcrypt = require('bcrypt')
 require('dotenv').config()
 
 
 exports.signin = async (req, res) => {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
     if (!email || !password)
         return res.json({
             message: 'Enter your credentials!!!'
         })
     const validEmail = email.includes('@gmail.com')
-    if (!validEmail) return res.json({
-        message: 'Enter valid email!!!'
-    })
+    if (!validEmail)
+        return res.json({
+            message: 'Enter valid email!!!'
+        })
     try {
         await User.findOne({
-            attributes: ['uuid', 'username', 'role', 'email'],
+            attributes: ['uuid', 'username', 'role', 'password'],
             where: {
-                email, password
+                email
             }
-        })
-            .then(userInfo => {
-                if (userInfo) {
+        }).then(userInfo => {
+            if (userInfo) {
+                const decrypted = bcrypt.compareSync(password, userInfo.password);
+                if (decrypted) {
                     const user = {
                         uuid: userInfo.uuid,
-                        username: userInfo.username,
-                        email: userInfo.email,
-                        role: userInfo.role
+                        username: userInfo.username
                     }
                     const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
                     return res.json({
@@ -43,14 +43,21 @@ exports.signin = async (req, res) => {
                         message: 'User not exist'
                     })
                 }
-            })
-            .catch(err => res.json({
+            } else {
+                return res.json({
+                    auth: false,
+                    status: 'FAILED',
+                    message: 'User not exist'
+                })
+            }
+        }).catch(err =>
+            res.json({
                 status: 'FAILED',
                 err
             }))
     }
     catch (err) {
-        console.log("err========>", err)
+        console.log(err)
         return res.json({
             status: 'FAILED',
             err
